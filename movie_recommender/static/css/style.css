@@ -1,0 +1,87 @@
+/* Стили для формы редактирования профиля */
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.form-group label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+
+
+button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+/* Уменьшаем размер карточки и выравниваем слева */
+.card {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 20px;
+}
+
+/* Заголовок и кнопки */
+.card-header h5 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Изменения для кнопки "Выход" */
+.nav-link.btn {
+    color: none !important;
+    text-decoration: none;
+}
+
+.nav-link.btn:hover {
+    background-color: transparent;
+}
+
+.flip-card {
+    perspective: 1000px;
+    height: 600px;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+    background-color: white;
+}
+
+.flip-card-back .card-body {
+    padding: 1.5rem;
+}

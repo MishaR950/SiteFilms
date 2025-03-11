@@ -1,0 +1,72 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6">  <!-- Увеличено с col-md-6 на col-md-8 -->
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h3 class="text-center">Вход</h3>
+                </div>
+                <div class="card-body p-5">  <!-- Увеличен padding с p-4 на p-5 -->
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group mb-4">  <!-- Увеличен отступ -->
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field.errors }}
+                                {{ field }}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">Войти</button>
+                    </form>
+                    <p class="mt-4 text-center">
+                        Нет аккаунта? <a href="{% url 'movies:register' %}" class="text-decoration-none">Зарегистрироваться</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 15px;
+    border: none;
+    max-width: 800px;  /* Максимальная ширина карточки */
+    margin: 0 auto;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: none;
+    padding: 25px;
+    border-radius: 15px 15px 0 0;
+}
+
+.form-control {
+    height: 45px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+.btn-primary {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+}
+
+.min-vh-100 {
+    margin-top: -60px;  /* Компенсация высоты навбара */
+}
+</style>
+{% endblock %}

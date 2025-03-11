@@ -1,0 +1,246 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<style>
+    .profile-container {
+        padding: 0 30px;
+        width: 100%;
+        max-width: 1920px;
+        margin: 0 auto;
+    }
+
+    .favorites-section {
+        max-width: 1920px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .favorites-section .card-header,
+    .favorites-section .card-body {
+        width: 100%;
+    }
+
+    .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        padding: 15px;
+        width: 100%;
+    }
+
+    .movie-card {
+        height: 100%;
+    }
+
+    .movie-poster img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .sticky-profile {
+        position: sticky;
+        top: 20px;
+    }
+
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .rating-form {
+        margin-bottom: 15px;
+    }
+
+    .rating-form select {
+        cursor: pointer;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+    }
+</style>
+
+<div class="container-fluid profile-container">
+    <h2 class="my-4 text-center">Профиль пользователя {{ user.username }}</h2>
+
+    <div class="row">
+        <!-- Форма редактирования профиля слева -->
+        <div class="col-lg-4">
+            <div class="card sticky-profile">
+                <div class="card-header">
+                    <h5>Редактирование профиля</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label for="id_first_name">Имя:</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ form.first_name.value }}" id="id_first_name" disabled>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="id_last_name">Фамилия:</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ form.last_name.value }}" id="id_last_name" disabled>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="id_email">Электронная почта:</label>
+                            <input type="email" name="email" class="form-control" value="{{ form.email.value }}" id="id_email" disabled>
+                        </div>
+
+                        <div id="edit-profile-btn-container">
+                            <button type="button" class="btn btn-primary w-100" id="edit-profile-btn">Редактировать профиль</button>
+                        </div>
+
+                        <div id="save-changes-btn-container" style="display: none;">
+                            <button type="submit" class="btn btn-success w-100">Сохранить изменения</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список избранных фильмов справа -->
+        <div class="col-lg-8">
+            <div class="card favorites-section">
+                <div class="card-header">
+                    <h5>Избранные фильмы</h5>
+                </div>
+                <div class="card-body">
+                    {% if user_favorites %}
+                        <div class="movie-grid">
+                            {% for favorite in user_favorites %}
+                                <div class="movie-card">
+                                    <div class="card h-100">
+                                        <div class="row g-0">
+                                            <div class="col-md-5 movie-poster">
+                                                {% if favorite.movie.poster %}
+                                                    <img src="{{ favorite.movie.poster.url }}" class="img-fluid rounded-start w-100" alt="{{ favorite.movie.title }}">
+                                                {% else %}
+                                                    <div class="no-poster">Нет постера</div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-7">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{ favorite.movie.title }}</h5>
+                                                    <div class="movie-info mb-2">
+                                                        <span class="badge bg-secondary">{{ favorite.movie.release_year }}</span>
+                                                        <span class="badge bg-info">{{ favorite.movie.country }}</span>
+                                                    </div>
+                                                    <div class="genres-list mb-3">
+                                                        {% for genre in favorite.movie.genres.all %}
+                                                            <span class="badge bg-primary">{{ genre.name }}</span>
+                                                        {% endfor %}
+                                                    </div>
+
+                                                    <!-- Rating Form -->
+                                                    <form method="post" action="{% url 'movies:rate_movie' favorite.movie.id %}" class="rating-form">
+                                                        {% csrf_token %}
+                                                        <div class="input-group">
+                                                            <select name="rating" class="form-select">
+                                                                <option value="">Оценить фильм</option>
+                                                                {% for i in "12345"|make_list %}
+                                                                    <option value="{{ i }}" {% if favorite.current_rating == i|add:"0" %}selected{% endif %}>
+                                                                        {{ i }} ⭐
+                                                                    </option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </form>
+
+                                                    <form method="post" action="{% url 'movies:add_to_favorites' favorite.movie.id %}" class="delete-favorite-form mt-3">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                            <i class="fas fa-times"></i> Удалить из избранного
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <p class="text-center">Вы не добавили ни одного фильма в избранное.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleFormElements(disabled) {
+        const formElements = document.querySelectorAll("input, select, textarea");
+        formElements.forEach(element => {
+            element.disabled = disabled;
+        });
+    }
+
+    function toggleButtons(editing) {
+        document.getElementById("edit-profile-btn-container").style.display = editing ? "none" : "block";
+        document.getElementById("save-changes-btn-container").style.display = editing ? "block" : "none";
+    }
+
+    document.getElementById("edit-profile-btn").addEventListener("click", function() {
+        toggleButtons(true);
+        toggleFormElements(false);
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleButtons(false);
+        toggleFormElements(true);
+
+        // Enable rating selects
+        document.querySelectorAll('.rating-form select').forEach(select => {
+            select.disabled = false;
+            select.addEventListener('change', function() {
+                const form = this.closest('form');
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const feedback = document.createElement('div');
+                        feedback.className = 'alert alert-success mt-2';
+                        feedback.textContent = 'Оценка сохранена!';
+                        form.appendChild(feedback);
+                        setTimeout(() => feedback.remove(), 2000);
+                    }
+                });
+            });
+        });
+    });
+
+    document.querySelectorAll('.delete-favorite-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    const movieCard = this.closest('.movie-card');
+                    movieCard.remove();
+
+                    const movieGrid = document.querySelector('.movie-grid');
+                    if (!movieGrid.children.length) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

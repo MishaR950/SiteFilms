@@ -1,0 +1,75 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        {% if movie.poster %}
+            <img src="{{ movie.poster.url }}" class="img-fluid">
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        <h1>{{ movie.title }}</h1>
+        <p>Год: {{ movie.release_year }}</p>
+        <p>Жанры: {% for genre in movie.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+
+        <!-- Карточка с переворотом -->
+        <div class="movie-card" id="movieCard">
+            <div class="movie-card-front">
+                <p>{{ movie.short_description }}</p>
+            </div>
+            <div class="movie-card-back">
+                <p>{{ movie.description }}</p>
+            </div>
+        </div>
+
+        <!-- Кнопка для переворота -->
+        <button class="btn btn-primary" id="toggleDetails">Подробнее</button>
+
+        <!-- Кнопка для добавления в избранное -->
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'movies:add_to_favorites' movie.id %}">
+
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Добавить в избранное</button>
+            </form>
+        {% endif %}
+
+        <script>
+            // Переворот карточки
+            document.getElementById("toggleDetails").addEventListener("click", function() {
+                var card = document.getElementById("movieCard");
+                card.classList.toggle("flipped");
+            });
+        </script>
+    </div>
+</div>
+
+<style>
+    .movie-card {
+        width: 100%;
+        height: 300px;
+        perspective: 1000px;
+    }
+
+    .movie-card-front, .movie-card-back {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        backface-visibility: hidden;
+        transition: transform 0.5s;
+    }
+
+    .movie-card-back {
+        transform: rotateY(180deg);
+        padding: 20px;
+    }
+
+    .movie-card.flipped .movie-card-front {
+        transform: rotateY(180deg);
+    }
+
+    .movie-card.flipped .movie-card-back {
+        transform: rotateY(0);
+    }
+</style>
+{% endblock %}

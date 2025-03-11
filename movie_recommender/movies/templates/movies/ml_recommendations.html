@@ -1,0 +1,237 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Для вас</h2>
+    {% if recommended_movies %}
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for movie in recommended_movies %}
+            <div class="col">
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <!-- Front of card -->
+                        <div class="flip-card-front">
+                            <div class="card h-100 shadow-sm hover-card">
+                                <div class="poster-container">
+                                    {% if movie.poster %}
+                                        <img src="{{ movie.poster.url }}" class="card-img-top movie-poster" alt="{{ movie.title }}">
+                                    {% else %}
+                                        <div class="no-poster">
+                                            <span>Нет постера</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title text-truncate mb-3" title="{{ movie.title }}">{{ movie.title }}</h5>
+
+                                    <div class="movie-info mb-3">
+                                        <div class="info-row">
+                                            <span class="badge bg-secondary">{{ movie.release_year }}</span>
+                                            <span class="badge bg-info">{{ movie.country }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="genres-list mt-auto">
+                                        {% for genre in movie.genres.all %}
+                                            <span class="badge bg-primary">{{ genre.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0">
+                                    <button class="btn btn-primary w-100 flip-button">Подробнее</button>
+                                    <form method="post" action="{% url 'movies:add_to_favorites' movie.id %}" class="add-to-favorites-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-warning w-100 mt-2">
+                                            {% if movie in user.favorite_movies.all %}
+                                                <i class="fas fa-heart"></i> В избранном
+                                            {% else %}
+                                                <i class="far fa-heart"></i> В избранное
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Back of card -->
+                        <div class="flip-card-back">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title mb-3">{{ movie.title }}</h5>
+                                    <p class="card-text flex-grow-1">{{ movie.description }}</p>
+                                    <div class="mt-auto">
+                                        <button class="btn btn-primary w-100 flip-back">Вернуться</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <h4 class="alert-heading mb-4">Нет рекомендаций</h4>
+        <p class="mb-4">Чтобы получить персональные рекомендации, добавьте несколько фильмов в избранное.</p>
+        <a href="{% url 'movies:movie_list' %}" class="btn btn-primary btn-lg">Перейти к каталогу фильмов</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.movie-poster {
+    height: 400px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.no-poster {
+    height: 400px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+
+.hover-card {
+    transition: transform 0.2s;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.movie-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.genres-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.badge {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    min-height: 2.8rem;
+    margin-bottom: 1rem;
+}
+
+.poster-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.flip-card {
+    perspective: 1000px;
+    height: 600px;
+    margin-bottom: 20px;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+    background-color: white;
+}
+
+.flip-card-back .card-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.flip-card-back .card-text {
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+.alert {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.alert-info {
+    background-color: #f8f9fa;
+    border: none;
+}
+</style>
+
+<script>
+document.querySelectorAll('.flip-button').forEach(button => {
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        const card = button.closest('.flip-card');
+        card.classList.add('flipped');
+    });
+});
+
+document.querySelectorAll('.flip-back').forEach(button => {
+    button.addEventListener('click', () => {
+        const card = button.closest('.flip-card');
+        card.classList.remove('flipped');
+    });
+});
+
+document.querySelectorAll('.add-to-favorites-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (response.ok) {
+                const button = this.querySelector('button');
+                if (button.innerHTML.includes('В избранное')) {
+                    button.innerHTML = '<i class="fas fa-heart"></i> В избранном';
+                } else {
+                    button.innerHTML = '<i class="far fa-heart"></i> В избранное';
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

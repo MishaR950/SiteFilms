@@ -1,0 +1,81 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h3 class="text-center">Регистрация</h3>
+                </div>
+                <div class="card-body p-3">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group mb-4">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field.errors }}
+                                {{ field }}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">Зарегистрироваться</button>
+                    </form>
+                    <p class="mt-4 text-center">
+                        Уже есть аккаунт? <a href="{% url 'movies:login' %}" class="text-decoration-none">Войти</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 15px;
+    border: none;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.card-header {
+    background-color: none;
+    border-bottom: none;
+    padding: 25px;
+    border-radius: 15px 15px 0 0;
+}
+
+.form-control {
+    height: 45px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+.btn-primary {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+    border-color: #86b7fe;
+}
+
+.min-vh-100 {
+    margin-top: -60px;
+}
+</style>
+{% endblock %}
